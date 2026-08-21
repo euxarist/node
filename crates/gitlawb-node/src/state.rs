@@ -225,6 +225,14 @@ pub struct AppState {
     /// axes). Keyed on the resolved client IP via `push_limiter_trust`. Layered on the
     /// `/ipfs` route via `rate_limit_by_ip`.
     pub ipfs_rate_limiter: RateLimiter,
+    /// Per-client-IP rate limiter for the task read routes. `GET /api/v1/tasks`
+    /// and `GET /api/v1/tasks/{id}` are anonymously reachable and run the #268
+    /// visibility gate (a task lookup plus deduped-repo and visibility-rule
+    /// queries) before returning the opaque 404, so an unauthenticated prober
+    /// costs the node real work per request whether or not anything is visible.
+    /// Keyed on the resolved client IP via `push_limiter_trust`. Layered on
+    /// `task_read_routes` via `rate_limit_by_ip`.
+    pub task_read_rate_limiter: RateLimiter,
     /// The `git` executable the served-git withheld-blob walk spawns. Production is
     /// `"git"` (resolved via PATH); injectable so a fake `git` can drive the walk's
     /// process-group teardown in handler tests without mutating the process-global

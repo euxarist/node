@@ -462,10 +462,18 @@ async fn main() -> Result<()> {
             std::time::Duration::from_secs(3600),
             200_000,
         ),
+        task_read_rate_limiter: rate_limit::RateLimiter::new_bounded(
+            config.task_read_rate_limit,
+            std::time::Duration::from_secs(3600),
+            200_000,
+        ),
         git_bin: "git".to_string(),
     };
     if config.ipfs_rate_limit == 0 {
         tracing::warn!("GITLAWB_IPFS_RATE_LIMIT=0 — per-IP /ipfs rate limiting disabled");
+    }
+    if config.task_read_rate_limit == 0 {
+        tracing::warn!("GITLAWB_TASK_READ_RATE_LIMIT=0 — per-IP task read rate limiting disabled");
     }
 
     // Periodic peer-count poll for the metrics gauge. If p2p is disabled
@@ -1088,6 +1096,7 @@ mod rate_limiter_sweep_tests {
         state.sync_trigger_rate_limiter = RateLimiter::new(10, window);
         state.peer_write_rate_limiter = RateLimiter::new(10, window);
         state.ipfs_rate_limiter = RateLimiter::new(10, window);
+        state.task_read_rate_limiter = RateLimiter::new(10, window);
 
         let limiters = |s: &crate::state::AppState| {
             [
@@ -1097,6 +1106,7 @@ mod rate_limiter_sweep_tests {
                 s.sync_trigger_rate_limiter.clone(),
                 s.peer_write_rate_limiter.clone(),
                 s.ipfs_rate_limiter.clone(),
+                s.task_read_rate_limiter.clone(),
             ]
         };
         for l in limiters(&state) {
@@ -1126,6 +1136,7 @@ async fn sweep_rate_limiters(state: &AppState) {
     state.sync_trigger_rate_limiter.cleanup().await;
     state.peer_write_rate_limiter.cleanup().await;
     state.ipfs_rate_limiter.cleanup().await;
+    state.task_read_rate_limiter.cleanup().await;
 }
 
 async fn gossip_ping_round(

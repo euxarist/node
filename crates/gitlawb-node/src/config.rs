@@ -539,6 +539,18 @@ pub struct Config {
     /// IP via `GITLAWB_TRUSTED_PROXY`. `0` disables. Default: 600.
     #[arg(long, env = "GITLAWB_IPFS_RATE_LIMIT", default_value_t = 600)]
     pub ipfs_rate_limit: usize,
+
+    /// Per-client-IP rate limit for the anonymous task read routes
+    /// (`GET /api/v1/tasks`, `GET /api/v1/tasks/{id}`), in requests per hour.
+    /// Both are publicly reachable (`optional_signature`), and each request runs
+    /// the visibility gate — a task lookup plus deduped-repo and visibility-rule
+    /// queries — before it can return the opaque 404, so an anonymous prober pays
+    /// nothing while the node pays for every probe. Keyed on the resolved client
+    /// IP via `GITLAWB_TRUSTED_PROXY`. `0` disables. Default: 1200 (a list page
+    /// followed by per-task reads is a normal client pattern, so this sits above
+    /// the `/ipfs` budget).
+    #[arg(long, env = "GITLAWB_TASK_READ_RATE_LIMIT", default_value_t = 1200)]
+    pub task_read_rate_limit: usize,
 }
 
 impl Config {
