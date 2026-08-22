@@ -1250,6 +1250,7 @@ mod tests {
         .await;
     }
 
+    #[cfg(unix)]
     #[sqlx::test]
     async fn process_batch_rejects_slug_escaping_repos_dir(pool: PgPool) {
         // The verified escape from #272: `PathBuf::join` discards everything
@@ -1899,6 +1900,7 @@ mod tests {
 
     // ── committed attack probes from the #272 investigation ──────────────────
 
+    #[cfg(unix)]
     #[sqlx::test]
     async fn queued_escape_slug_cannot_plant_a_mirror_outside_repos_dir(pool: PgPool) {
         // The worker half of #272, committed in its attack form. The row goes

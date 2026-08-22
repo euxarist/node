@@ -4993,6 +4993,7 @@ mod tests {
     /// task the global slot stays occupied until the walk finishes; on the pre-fix code
     /// the handler-local permits drop on future-drop and the slot frees instantly (RED),
     /// letting disconnect-spam exceed the cap while real git work keeps running.
+    #[cfg(unix)]
     #[sqlx::test]
     async fn upload_pack_permit_held_through_walk_after_disconnect(pool: sqlx::PgPool) {
         use axum::body::Body;
@@ -5860,6 +5861,7 @@ mod tests {
     /// sheds — releasing the permit lets the SAME walk run and pin (durability stays
     /// fail-closed). Exercises the gating seam directly; the detached push task calls
     /// this exact helper.
+    #[cfg(unix)]
     #[tokio::test]
     async fn encrypt_walk_defers_when_pool_exhausted() {
         use std::sync::Arc;
